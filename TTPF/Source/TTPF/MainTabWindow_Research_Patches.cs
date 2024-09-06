@@ -71,9 +71,7 @@ namespace TTPF
                     }
                     else
                     {
-                        List<ResearchProjectDef> researchProjectsList = new List<ResearchProjectDef>();
-                        researchProjectsList.Add(researchProjectDef);
-                        researchProjectsDict.Add(modName, researchProjectsList);
+                        researchProjectsDict.Add(modName, new List<ResearchProjectDef> { researchProjectDef });
                     }
                 }
 
