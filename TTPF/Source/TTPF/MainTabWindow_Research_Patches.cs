@@ -130,6 +130,7 @@ namespace TTPF
                         {
                             selectedProject.tab = researchTabDef;
                             ResearchProjectDefTracker.ChangeTab(selectedProject);
+                            __instance.PostOpen();
 
                         }), MenuOptionPriority.Default));
 
@@ -150,7 +151,8 @@ namespace TTPF
         /* Reeplace the function to skip empty tabs */
         static void Postfix(MainTabWindow __instance)
         {
-            foreach(ResearchProjectDef researchProjectDef in DefDatabase<ResearchProjectDef>.AllDefs)
+            nonEmptyResearchTabDef.Clear();
+            foreach (ResearchProjectDef researchProjectDef in DefDatabase<ResearchProjectDef>.AllDefs)
             {
                 nonEmptyResearchTabDef.Add(researchProjectDef.tab);
             }
