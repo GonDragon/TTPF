@@ -7,6 +7,7 @@ using UnityEngine;
 using Verse;
 using System;
 using System.Text;
+using System.Collections;
 
 namespace TTPF
 {
@@ -139,6 +140,47 @@ namespace TTPF
             }
         }
 
+    }
+
+    [HarmonyPatch(typeof(MainTabWindow_Research), "PostOpen")]
+    internal static class Patch_MainTabWindow_Research_PostOpen
+    {
+        private static HashSet<ResearchTabDef> nonEmptyResearchTabDef = new();
+
+        /* Reeplace the function to skip empty tabs */
+        static void Postfix(MainTabWindow __instance)
+        {
+            foreach(ResearchProjectDef researchProjectDef in DefDatabase<ResearchProjectDef>.AllDefs)
+            {
+                nonEmptyResearchTabDef.Add(researchProjectDef.tab);
+            }
+
+
+            // Access the private field "tabs" using reflection
+            var tabsField = typeof(MainTabWindow_Research)
+                .GetField("tabs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            var tabs = tabsField.GetValue(__instance) as IList;
+
+            if (tabs != null)
+            {
+                for (int i = tabs.Count - 1; i >= 0; i--) // Loop backwards to safely remove items
+                {
+                    var tab = tabs[i];
+
+                    // Access the public readonly field "def" of each ResearchTabRecord
+                    var defField = tab.GetType()
+                        .GetField("def", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+                    var def = defField.GetValue(tab) as ResearchTabDef;
+
+                    if (!nonEmptyResearchTabDef.Contains(def))
+                    {
+                        tabs.RemoveAt(i);
+                    }
+                }
+            }
+        }
     }
 
     internal static class ResearchProjectDefTracker
