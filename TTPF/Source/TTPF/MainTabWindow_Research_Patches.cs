@@ -61,7 +61,7 @@ namespace TTPF
                 stringBuilder.AppendLine("<Patch>");
 
                 Dictionary<string, List<ResearchProjectDef>> researchProjectsDict = new Dictionary<string, List<ResearchProjectDef>>();
-                foreach (ResearchProjectDef researchProjectDef in researchWindow.VisibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => def.Debug_IsPositionModified())))
+                foreach (ResearchProjectDef researchProjectDef in researchWindow.VisibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
                 {
                     string modName = researchProjectDef.modContentPack.Name;
 
@@ -128,6 +128,7 @@ namespace TTPF
                         floatMenuOptions.Add(new FloatMenuOption(researchTabDef.label, (Action)(() =>
                         {
                             selectedProject.tab = researchTabDef;
+                            ResearchProjectDefTracker.ChangeTab(selectedProject);
 
                         }), MenuOptionPriority.Default));
 
@@ -138,5 +139,20 @@ namespace TTPF
             }
         }
 
+    }
+
+    internal static class ResearchProjectDefTracker
+    {
+        private static HashSet<ResearchProjectDef> editedResearchProjectDefs = new();
+
+        public static bool Debug_IsPositionModified(ResearchProjectDef researchProjectDef)
+        {
+            return editedResearchProjectDefs.Contains(researchProjectDef) || researchProjectDef.Debug_IsPositionModified();
+        }
+
+        public static void ChangeTab(ResearchProjectDef researchProjectDef)
+        {
+            editedResearchProjectDefs.Add(researchProjectDef);
+        }
     }
 }
