@@ -45,7 +45,23 @@ namespace TTPF
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            /* Empty for now */
+            Rect buttonRect = new Rect(inRect.width / 2 - 100, inRect.height / 2 - 30, 200, 60);
+
+            if (Widgets.ButtonText(buttonRect, "Restore Default Tech Tree"))
+            {
+                // Show confirmation dialog
+                Find.WindowStack.Add(new Dialog_MessageBox(
+                    "The game needs to be restarted to apply the changes. Please save your game and restart the game manually.",
+                    "OK", () => ClearUserChanges(), // OK button
+                    "Cancel" // Cancel button
+                ));
+            }
+        }
+
+        private void ClearUserChanges()
+        {
+            settings.customResearchTabs.Clear();
+            settings.Write();
         }
 
         public override string SettingsCategory()
