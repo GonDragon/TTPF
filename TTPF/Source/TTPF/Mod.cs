@@ -31,6 +31,17 @@ namespace TTPF
         {
             Harmony = new Harmony(Id);
             Harmony.PatchAll();
+
+            foreach (var customTab in TTPF_Mod.settings.customResearchTabs)
+            {
+                var researchDef = DefDatabase<ResearchProjectDef>.GetNamed(customTab.researchDefName, false);
+                if (researchDef != null)
+                {
+                    researchDef.tab = DefDatabase<ResearchTabDef>.GetNamed(customTab.researchTabDefName, false);
+                    researchDef.researchViewX = customTab.researchViewX;
+                    researchDef.researchViewY = customTab.researchViewY;
+                }
+            }
         }
 
         public static void Log(string message) => Verse.Log.Message(PrefixMessage(message));

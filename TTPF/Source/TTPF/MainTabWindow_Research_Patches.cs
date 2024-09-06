@@ -114,6 +114,11 @@ namespace TTPF
             butRect.width = 100f;
             if (editMode && Widgets.ButtonText(butRect, "Save Changes", true, false, true))
             {
+                foreach (ResearchProjectDef researchProjectDef in researchWindow.VisibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
+                {
+                    TTPF_Mod.settings.AddCustomResearchData(researchProjectDef.defName, researchProjectDef.tab.defName, researchProjectDef.ResearchViewX, researchProjectDef.ResearchViewY);
+                }
+                TTPF_Mod.settings.Write();
                 TTPF.Message("Research tree data saved.");
             }
         }

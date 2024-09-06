@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="MainTabWindow_Research_Patches.cs" />
     <Compile Include="Mod.cs" />
+    <Compile Include="ModSettings.cs" />
     <Compile Include="PatchOperationEditResearch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
