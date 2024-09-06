@@ -50,11 +50,13 @@ namespace TTPF
         }
         private static void DoPatchButton(RectAggregator rightOutRect, MainTabWindow_Research researchWindow)
         {
+            var tabsField = typeof(MainTabWindow_Research).GetField("editMode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            bool editMode = (bool)tabsField.GetValue(researchWindow);
+
             Rect rect = rightOutRect;
-            rect.yMax = rect.yMin + 20f;
-            Rect butRect = rect.RightPartPixels(30f);
-            butRect.x -= 150f;
-            butRect.width = 90f;
+            Rect butRect = new(rect.xMax - 175f, rect.yMin, 90f, 20f);
+
             if (Widgets.ButtonText(butRect, "Copy Patch", true, false, true))
             {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -106,6 +108,13 @@ namespace TTPF
                 stringBuilder.AppendLine("</Patch>");
                 GUIUtility.systemCopyBuffer = stringBuilder.ToString();
                 TTPF.Message("Patched research tree data copied to clipboard.");
+            }
+
+            butRect.x -= 110f;
+            butRect.width = 100f;
+            if (editMode && Widgets.ButtonText(butRect, "Save Changes", true, false, true))
+            {
+                TTPF.Message("Research tree data saved.");
             }
         }
     }
