@@ -7,8 +7,6 @@ using UnityEngine;
 using Verse;
 using System;
 using System.Text;
-using System.Reflection;
-using Verse.Sound;
 
 namespace TTPF
 {
@@ -116,41 +114,6 @@ namespace TTPF
     [HarmonyPatch(typeof(MainTabWindow_Research), "DrawProjectInfo")]
     internal class MainTabWindow_Research_InjectTabsFloatMenu
     {
-        //private static IEnumerable<CodeInstruction> Transpiler(ILGenerator gen, IEnumerable<CodeInstruction> instructions)
-        //{
-        //    CodeInstruction prev = instructions.First();
-        //    bool patchButton = false;
-        //    int callvirtUsed = 0;
-
-        //    foreach (var code in instructions)
-        //    {
-        //        if (!patchButton)
-        //        {
-        //            if (prev.opcode == OpCodes.Callvirt)
-        //            {
-        //                callvirtUsed++;
-        //                TTPF.Warning(String.Format("callvirtUsed: {0}", callvirtUsed));
-
-        //                if (callvirtUsed == 10)
-        //                {
-        //                    patchButton = true;
-
-        //                    yield return code;
-        //                    yield return new CodeInstruction(OpCodes.Ldarg_0);
-        //                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainTabWindow_Research_InjectTabsFloatMenu), nameof(RightClickMenu)));
-        //                    continue;
-        //                }
-        //            }
-        //            yield return code;
-        //            prev = code;
-        //        }
-        //        else
-        //        {
-        //            yield return code;
-        //        }
-        //    }
-        //}
-
         private static void Postfix(MainTabWindow_Research __instance, Rect rect, ref ResearchTabDef ___curTabInt, ref ResearchProjectDef ___selectedProject, ref bool ___editMode)
         {
             Rect buttonRect = new Rect(rect.x, rect.yMax - ((!ModsConfig.AnomalyActive || ___curTabInt != ResearchTabDefOf.Anomaly) ? 100f : 180f) - 30f, rect.width, 28f);
