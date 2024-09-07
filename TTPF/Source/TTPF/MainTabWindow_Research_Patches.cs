@@ -57,7 +57,7 @@ namespace TTPF
             Rect rect = rightOutRect;
             Rect butRect = new(rect.xMax - 175f, rect.yMin, 90f, 20f);
 
-            if (Widgets.ButtonText(butRect, "Copy Patch", true, false, true))
+            if (editMode && Widgets.ButtonText(butRect, "Copy Patch", true, false, true))
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
@@ -66,7 +66,8 @@ namespace TTPF
                 Dictionary<string, List<ResearchProjectDef>> researchProjectsDict = new Dictionary<string, List<ResearchProjectDef>>();
                 foreach (ResearchProjectDef researchProjectDef in researchWindow.VisibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
                 {
-                    string modName = researchProjectDef.modContentPack.Name;
+                    string modName = researchProjectDef.modContentPack?.Name;
+                    if (modName == null) modName = "";
 
                     if (researchProjectsDict.ContainsKey(modName))
                     {
@@ -80,6 +81,22 @@ namespace TTPF
 
                 foreach(String modname in researchProjectsDict.Keys)
                 {
+                    if(modname == "" || modname == "Core")
+                    {
+                        foreach (ResearchProjectDef researchProjectDef in researchProjectsDict[modname])
+                        {
+                            stringBuilder.AppendLine("  <Operation Class=\"VESSP.PatchOperationEditResearch\">");
+                            stringBuilder.AppendLine("    <success>Always</success>");
+                            stringBuilder.AppendLine();
+                            stringBuilder.AppendLine(string.Format("    <xpath>Defs/ResearchProjectDef[defName=\"{0}\"]</xpath>", researchProjectDef.defName));
+                            stringBuilder.AppendLine(string.Format("    <researchViewX>{0:F2}</researchViewX>", (object)researchProjectDef.ResearchViewX));
+                            stringBuilder.AppendLine(string.Format("    <researchViewY>{0:F2}</researchViewY>", (object)researchProjectDef.ResearchViewY));
+                            stringBuilder.AppendLine(string.Format("    <tab>{0}</tab>", (object)researchProjectDef.tab));
+                            stringBuilder.AppendLine("  </Operation>");
+                            stringBuilder.AppendLine();
+                        }
+                        continue;
+                    }
                     stringBuilder.AppendLine("  <Operation Class=\"PatchOperationFindMod\">");
                     stringBuilder.AppendLine("    <mods>");
                     stringBuilder.AppendLine(string.Format("      <li>{0}</li>", modname));
