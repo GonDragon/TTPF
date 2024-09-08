@@ -8,6 +8,7 @@ using Verse;
 using System;
 using System.Text;
 using System.Collections;
+using Verse.Sound;
 
 namespace TTPF
 {
@@ -85,7 +86,7 @@ namespace TTPF
                     {
                         foreach (ResearchProjectDef researchProjectDef in researchProjectsDict[modname])
                         {
-                            stringBuilder.AppendLine("  <Operation Class=\"VESSP.PatchOperationEditResearch\">");
+                            stringBuilder.AppendLine("  <Operation Class=\"TTPF.PatchOperationEditResearch\">");
                             stringBuilder.AppendLine("    <success>Always</success>");
                             stringBuilder.AppendLine();
                             stringBuilder.AppendLine(string.Format("    <xpath>Defs/ResearchProjectDef[defName=\"{0}\"]</xpath>", researchProjectDef.defName));
@@ -107,7 +108,7 @@ namespace TTPF
 
                     foreach (ResearchProjectDef researchProjectDef in researchProjectsDict[modname])
                     {
-                        stringBuilder.AppendLine("        <li Class=\"VESSP.PatchOperationEditResearch\">");
+                        stringBuilder.AppendLine("        <li Class=\"TTPF.PatchOperationEditResearch\">");
                         stringBuilder.AppendLine("          <success>Always</success>");
                         stringBuilder.AppendLine();
                         stringBuilder.AppendLine(string.Format("          <xpath>Defs/ResearchProjectDef[defName=\"{0}\"]</xpath>", researchProjectDef.defName));

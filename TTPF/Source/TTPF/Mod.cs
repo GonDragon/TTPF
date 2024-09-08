@@ -42,6 +42,13 @@ namespace TTPF
                     researchDef.researchViewY = customTab.researchViewY;
                 }
             }
+
+            // Why there are hidden prerequisites? Just add them to the normal prerequisites.
+            foreach (ResearchProjectDef researchProject in DefDatabase<ResearchProjectDef>.AllDefs)
+            {
+                researchProject.prerequisites?.AddRange(researchProject.hiddenPrerequisites ?? new List<ResearchProjectDef>());
+            }
+
         }
 
         public static void Log(string message) => Verse.Log.Message(PrefixMessage(message));
