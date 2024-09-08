@@ -4,6 +4,8 @@ using System.Linq;
 using System.Xml;
 using Verse;
 using TTPF;
+using System.Collections.Generic;
+using RimWorld;
 
 namespace TTPF
 {
@@ -19,6 +21,9 @@ namespace TTPF
         public XmlContainer researchViewX;
         public XmlContainer researchViewY;
         public XmlContainer tab;
+        public XmlContainer prerequisites;
+        public XmlContainer hiddenPrerequisites;
+        public XmlContainer baseCost;
 
         protected override bool ApplyWorker(XmlDocument xml)
         {
@@ -34,9 +39,6 @@ namespace TTPF
                 }
             }
 
-            string researchViewX = this.researchViewX?.node.InnerText;
-            string researchViewY = this.researchViewY?.node.InnerText;
-            string tab = this.tab?.node.InnerText;
             bool result = false;
 
             foreach (XmlNode parentNode in xml.SelectNodes(xpath).Cast<XmlNode>().ToArray<XmlNode>())
@@ -46,15 +48,45 @@ namespace TTPF
                 ReplaceNode(parentNode, "researchViewX", researchViewX);
                 ReplaceNode(parentNode, "researchViewY", researchViewY);
                 ReplaceNode(parentNode, "tab", tab);
+                ReplaceNode(parentNode, "baseCost", baseCost);
+
+                ReplaceChildren(parentNode, "prerequisites", prerequisites);
+                ReplaceChildren(parentNode, "hiddenPrerequisites", hiddenPrerequisites);
+
             }
 
             return result;
         }
 
-        private void ReplaceNode(XmlNode parentNode, string nodeName, string value)
+        private void ReplaceChildren(XmlNode parentNode, string nodeName, XmlContainer childrenContainer, bool keepOld = true)
         {
-            if(String.IsNullOrWhiteSpace(value))
-                return; 
+            if(childrenContainer == null) return;
+
+            XmlNode node = parentNode.SelectSingleNode(nodeName);
+            XmlNode childrenContainerNode = childrenContainer.node;
+
+            if (node != null)
+            {
+                while (!keepOld || node.HasChildNodes)
+                {
+                    node.RemoveChild(node.FirstChild);
+                }
+                foreach (XmlNode children in childrenContainerNode.ChildNodes)
+                {
+                    XmlNode newchild = node.OwnerDocument.CreateNode(XmlNodeType.Element, "li", "");
+                    newchild.InnerText = children.InnerText;
+                    node.AppendChild(newchild);
+                }
+            }
+        }
+
+        private void ReplaceNode(XmlNode parentNode, string nodeName, XmlContainer valueContainer)
+        {
+            if(valueContainer == null) return;
+
+            string value = valueContainer?.node.InnerText;
+
+            if (string.IsNullOrWhiteSpace(value)) return;
 
             XmlNode node = parentNode.SelectSingleNode(nodeName);
             if (node != null)
