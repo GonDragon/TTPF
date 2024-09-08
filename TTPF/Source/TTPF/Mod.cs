@@ -43,11 +43,14 @@ namespace TTPF
                 }
             }
 
-            // Why there are hidden prerequisites? Just add them to the normal prerequisites.
+
+#if DEBUG
+            // Why there are hidden prerequisites? Just add them to the normal prerequisites. At least for debugging.
             foreach (ResearchProjectDef researchProject in DefDatabase<ResearchProjectDef>.AllDefs)
             {
                 researchProject.prerequisites?.AddRange(researchProject.hiddenPrerequisites ?? new List<ResearchProjectDef>());
             }
+#endif
 
         }
 
