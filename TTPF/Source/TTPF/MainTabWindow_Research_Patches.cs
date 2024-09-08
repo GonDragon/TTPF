@@ -208,7 +208,7 @@ namespace TTPF
 
                     var def = defField.GetValue(tab) as ResearchTabDef;
 
-                    if (!nonEmptyResearchTabDef.Contains(def))
+                    if (!nonEmptyResearchTabDef.Contains(def) || (!Prefs.DevMode && def.defName == "TTPF_Hidden"))
                     {
                         tabs.RemoveAt(i);
                     }
