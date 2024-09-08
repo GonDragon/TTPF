@@ -24,6 +24,7 @@ namespace TTPF
         public XmlContainer prerequisites;
         public XmlContainer hiddenPrerequisites;
         public XmlContainer baseCost;
+        public XmlContainer techLevel;
 
         protected override bool ApplyWorker(XmlDocument xml)
         {
@@ -49,6 +50,7 @@ namespace TTPF
                 ReplaceNode(parentNode, "researchViewY", researchViewY);
                 ReplaceNode(parentNode, "tab", tab);
                 ReplaceNode(parentNode, "baseCost", baseCost);
+                ReplaceNode(parentNode, "techLevel", techLevel);
 
                 ReplaceChildren(parentNode, "prerequisites", prerequisites);
                 ReplaceChildren(parentNode, "hiddenPrerequisites", hiddenPrerequisites);
