@@ -34,15 +34,20 @@ namespace TTPF
 
             foreach (var customTab in TTPF_Mod.settings.customResearchTabs)
             {
+#if DEBUG
+            TTPF.Warning(string.Format("Loading user settings for {0}", customTab.researchDefName));
+#endif
                 var researchDef = DefDatabase<ResearchProjectDef>.GetNamed(customTab.researchDefName, false);
                 if (researchDef != null)
                 {
                     researchDef.tab = DefDatabase<ResearchTabDef>.GetNamed(customTab.researchTabDefName, false);
                     researchDef.researchViewX = customTab.researchViewX;
                     researchDef.researchViewY = customTab.researchViewY;
+#if DEBUG
+                    TTPF.Warning(string.Format("User settings loaded at X:{0} - Y:{1}", customTab.researchViewX, customTab.researchViewY));
+#endif
                 }
             }
-
 
 #if DEBUG
             // Why there are hidden prerequisites? Just add them to the normal prerequisites. At least for debugging.
