@@ -9,12 +9,31 @@ using System;
 using System.Text;
 using System.Collections;
 using Verse.Sound;
+using System.Reflection;
 
 namespace TTPF
 {
-    [HarmonyPatch(typeof(MainTabWindow_Research), "DrawRightRect")]
-    internal class MainTabWindow_Research_InjectPatchButton
+    [StaticConstructorOnStartup]
+    internal static class MainTabWindow_BetterResearchTab_InjectPatchButton
     {
+        static readonly FieldInfo tabsField;
+        static readonly PropertyInfo visibleResearchProjectsField;
+
+        static MainTabWindow_BetterResearchTab_InjectPatchButton()
+        {
+            if (ModsConfig.IsActive("andery233xj.mod.BetterResearchTabs"))
+            {
+                var original = AccessTools.Method("TowersBetterResearchTabs.MainTabWindow_Research:DrawRightRect");
+                var transpilerfunction = Transpiler;
+
+                TTPF.Harmony.Patch(original, transpiler: transpilerfunction);
+
+                tabsField = AccessTools.TypeByName("TowersBetterResearchTabs.MainTabWindow_Research").GetField("editMode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                visibleResearchProjectsField = AccessTools.TypeByName("TowersBetterResearchTabs.MainTabWindow_Research").GetProperty("VisibleResearchProjects");
+
+            }
+        }
+
         private static IEnumerable<CodeInstruction> Transpiler(ILGenerator gen, IEnumerable<CodeInstruction> instructions)
         {
             CodeInstruction prev = instructions.First();
@@ -36,7 +55,7 @@ namespace TTPF
                             yield return code;
                             yield return new CodeInstruction(OpCodes.Ldarg_1);
                             yield return new CodeInstruction(OpCodes.Ldarg_0);
-                            yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainTabWindow_Research_InjectPatchButton), nameof(DoPatchButton)));
+                            yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MainTabWindow_BetterResearchTab_InjectPatchButton), nameof(MainTabWindow_BetterResearchTab_InjectPatchButton.DoPatchButton)));
                             continue;
                         }
                     }
@@ -49,9 +68,11 @@ namespace TTPF
                 }
             }
         }
-        internal static void DoPatchButton(RectAggregator rightOutRect, MainTabWindow_Research researchWindow)
+        
+
+        internal static void DoPatchButton(RectAggregator rightOutRect, MainTabWindow researchWindow)
         {
-            var tabsField = typeof(MainTabWindow_Research).GetField("editMode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var visibleResearchProjects = (List<ResearchProjectDef>)visibleResearchProjectsField.GetValue(researchWindow);
 
             bool editMode = (bool)tabsField.GetValue(researchWindow);
 
@@ -65,7 +86,7 @@ namespace TTPF
                 stringBuilder.AppendLine("<Patch>");
 
                 Dictionary<string, List<ResearchProjectDef>> researchProjectsDict = new Dictionary<string, List<ResearchProjectDef>>();
-                foreach (ResearchProjectDef researchProjectDef in researchWindow.VisibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
+                foreach (ResearchProjectDef researchProjectDef in visibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
                 {
                     string modName = researchProjectDef.modContentPack?.Name;
                     if (modName == null) modName = "";
@@ -80,9 +101,9 @@ namespace TTPF
                     }
                 }
 
-                foreach(String modname in researchProjectsDict.Keys)
+                foreach (String modname in researchProjectsDict.Keys)
                 {
-                    if(modname == "" || modname == "Core")
+                    if (modname == "" || modname == "Core")
                     {
                         foreach (ResearchProjectDef researchProjectDef in researchProjectsDict[modname])
                         {
@@ -132,7 +153,7 @@ namespace TTPF
             butRect.width = 100f;
             if (editMode && Widgets.ButtonText(butRect, "Save Changes", true, false, true))
             {
-                foreach (ResearchProjectDef researchProjectDef in researchWindow.VisibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
+                foreach (ResearchProjectDef researchProjectDef in visibleResearchProjects.Where<ResearchProjectDef>((Func<ResearchProjectDef, bool>)(def => ResearchProjectDefTracker.Debug_IsPositionModified(def))))
                 {
                     TTPF_Mod.settings.AddCustomResearchData(researchProjectDef.defName, researchProjectDef.tab.defName, researchProjectDef.ResearchViewX, researchProjectDef.ResearchViewY);
                 }
@@ -140,12 +161,24 @@ namespace TTPF
                 TTPF.Message("Research tree data saved.");
             }
         }
+
     }
 
-    [HarmonyPatch(typeof(MainTabWindow_Research), "DrawProjectInfo")]
-    internal class MainTabWindow_Research_InjectTabsFloatMenu
+    [StaticConstructorOnStartup]
+    internal class MainTabWindow_BetterResearchTab_InjectTabsFloatMenu
     {
-        private static void Postfix(MainTabWindow_Research __instance, Rect rect, ref ResearchTabDef ___curTabInt, ref ResearchProjectDef ___selectedProject, ref bool ___editMode)
+        static MainTabWindow_BetterResearchTab_InjectTabsFloatMenu()
+        {
+            if (ModsConfig.IsActive("andery233xj.mod.BetterResearchTabs"))
+            {
+                var original = AccessTools.Method("TowersBetterResearchTabs.MainTabWindow_Research:DrawProjectInfo");
+                var postfix = Postfix;
+
+                TTPF.Harmony.Patch(original, postfix: postfix);
+            }
+        }
+
+        private static void Postfix(MainTabWindow __instance, Rect rect, ref ResearchTabDef ___curTabInt, ref ResearchProjectDef ___selectedProject, ref bool ___editMode)
         {
             Rect buttonRect = new Rect(rect.x, rect.yMax - ((!ModsConfig.AnomalyActive || ___curTabInt != ResearchTabDefOf.Anomaly) ? 100f : 180f) - 30f, rect.width, 28f);
             ResearchProjectDef selectedProject = ___selectedProject;
@@ -175,10 +208,28 @@ namespace TTPF
 
     }
 
-    [HarmonyPatch(typeof(MainTabWindow_Research), "PostOpen")]
-    internal static class Patch_MainTabWindow_Research_PostOpen
+    [StaticConstructorOnStartup]
+    internal static class Patch_MainTabWindow_BetterResearchTab_PostOpen
     {
+
+        static FieldInfo tabsField;
+        static Patch_MainTabWindow_BetterResearchTab_PostOpen()
+        {
+            if (ModsConfig.IsActive("andery233xj.mod.BetterResearchTabs"))
+            {
+                var original = AccessTools.Method("TowersBetterResearchTabs.MainTabWindow_Research:PostOpen");
+                var postfix = Postfix;
+
+                TTPF.Harmony.Patch(original, postfix: postfix);
+
+                tabsField = AccessTools.TypeByName("TowersBetterResearchTabs.MainTabWindow_Research")
+                .GetField("tabs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            }
+        }
+
+
         private static HashSet<ResearchTabDef> nonEmptyResearchTabDef = new();
+
 
         /* Reeplace the function to skip empty tabs */
         static void Postfix(MainTabWindow __instance)
@@ -188,11 +239,6 @@ namespace TTPF
             {
                 nonEmptyResearchTabDef.Add(researchProjectDef.tab);
             }
-
-
-            // Access the private field "tabs" using reflection
-            var tabsField = typeof(MainTabWindow_Research)
-                .GetField("tabs", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             var tabs = tabsField.GetValue(__instance) as IList;
 
@@ -214,21 +260,6 @@ namespace TTPF
                     }
                 }
             }
-        }
-    }
-
-    internal static class ResearchProjectDefTracker
-    {
-        private static HashSet<ResearchProjectDef> editedResearchProjectDefs = new();
-
-        public static bool Debug_IsPositionModified(ResearchProjectDef researchProjectDef)
-        {
-            return editedResearchProjectDefs.Contains(researchProjectDef) || researchProjectDef.Debug_IsPositionModified();
-        }
-
-        public static void ChangeTab(ResearchProjectDef researchProjectDef)
-        {
-            editedResearchProjectDefs.Add(researchProjectDef);
         }
     }
 }

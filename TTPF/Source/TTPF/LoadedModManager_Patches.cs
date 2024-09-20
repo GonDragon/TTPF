@@ -12,20 +12,26 @@ using Verse.Sound;
 
 namespace TTPF
 {
-
-    
+    [HarmonyPatch(typeof(LoadedModManager), nameof(LoadedModManager.LoadAllActiveMods))]
     internal class Patch_LoadedModManager_LoadAllMods
     {
-        static void Postfix()
+        internal static void Postfix()
         {
+            TTPF.Warning("LoadedModManager.LoadAllActiveMods postfix");
             foreach (var customTab in TTPF_Mod.settings.customResearchTabs)
             {
-                var researchDef = DefDatabase<ResearchProjectDef>.GetNamedSilentFail(customTab.researchDefName);
+#if DEBUG
+                TTPF.Warning(string.Format("Loading user settings for {0}", customTab.researchDefName));
+#endif
+                var researchDef = DefDatabase<ResearchProjectDef>.GetNamed(customTab.researchDefName, false);
                 if (researchDef != null)
                 {
-                    researchDef.tab = DefDatabase<ResearchTabDef>.GetNamedSilentFail(customTab.researchTabDefName);
+                    researchDef.tab = DefDatabase<ResearchTabDef>.GetNamed(customTab.researchTabDefName, false);
                     researchDef.researchViewX = customTab.researchViewX;
                     researchDef.researchViewY = customTab.researchViewY;
+#if DEBUG
+                    TTPF.Warning(string.Format("User settings loaded at X:{0} - Y:{1}", customTab.researchViewX, customTab.researchViewY));
+#endif
                 }
             }
         }
