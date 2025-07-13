@@ -32,7 +32,7 @@ namespace TTPF
             Harmony = new Harmony(Id);
             Harmony.PatchAll();
 
-foreach (var customTab in TTPF_Mod.settings.customResearchTabs)
+            foreach (var customTab in TTPF_Mod.settings.customResearchTabs)
             {
 #if DEBUG
                 TTPF.Warning(string.Format("Loading Custom {0}", customTab.researchDefName));
@@ -53,14 +53,48 @@ foreach (var customTab in TTPF_Mod.settings.customResearchTabs)
                 }
             }
 
-#if DEBUG
-            // Why there are hidden prerequisites? Just add them to the normal prerequisites. At least for debugging.
+            //Remove redundant prerequisites
             foreach (ResearchProjectDef researchProject in DefDatabase<ResearchProjectDef>.AllDefs)
             {
-                researchProject.prerequisites?.AddRange(researchProject.hiddenPrerequisites ?? new List<ResearchProjectDef>());
+                if (researchProject.prerequisites == null) continue;
+                foreach(ResearchProjectDef prerequisite in researchProject.prerequisites)
+                {
+                    if (TTPF.IsRedundant(researchProject, prerequisite))
+                    {
+                        researchProject.prerequisites.Remove(prerequisite);
+                    }
+                }
             }
-#endif
 
+        }
+
+        private static bool IsRedundant(ResearchProjectDef proyect, ResearchProjectDef other)
+        {
+            List<ResearchProjectDef> checked_proyects = new List<ResearchProjectDef>();
+            List<ResearchProjectDef> tocheck_proyects = new List<ResearchProjectDef>();
+
+            tocheck_proyects.AddRange(proyect.prerequisites);
+
+            if(tocheck_proyects.Contains(other)) tocheck_proyects.Remove(other);
+
+            while (tocheck_proyects.Count > 0)
+            {
+                ResearchProjectDef tocheck = tocheck_proyects.Pop();
+
+                if (tocheck.prerequisites == null) continue;
+                foreach (ResearchProjectDef prerequisite in tocheck.prerequisites)
+                {
+                    if (prerequisite == other) return true;
+
+                    if (checked_proyects.Contains(prerequisite)) continue;
+
+                    checked_proyects.Add(prerequisite);
+                    if (prerequisite.prerequisites == null) continue;
+                    tocheck_proyects.AddRange(prerequisite.prerequisites);
+                }
+            }
+
+            return false;
         }
 
         public static void Log(string message) => Verse.Log.Message(PrefixMessage(message));
