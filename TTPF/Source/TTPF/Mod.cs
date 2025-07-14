@@ -57,7 +57,7 @@ namespace TTPF
             foreach (ResearchProjectDef researchProject in DefDatabase<ResearchProjectDef>.AllDefs)
             {
                 if (researchProject.prerequisites == null) continue;
-                foreach(ResearchProjectDef prerequisite in researchProject.prerequisites)
+                foreach(ResearchProjectDef prerequisite in researchProject.prerequisites.ListFullCopy())
                 {
                     if (TTPF.IsRedundant(researchProject, prerequisite))
                     {
